@@ -50,12 +50,16 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 };
 
-const deleteFromCloudinary = async (file_public_id) => {
+const deleteFromCloudinary = async (file_public_id) => {  // file_public_id -> chaiAurBackend/thumnail_asmglm
     try {
+        const requiredKeywordArray = file_public_id.split("/"); // requiredKeywordArray will be an array -> ["chaiAurBackend", "thumnail_asmglm"]
+        const resource_type = requiredKeywordArray[0] ===  "chaiAurBackendVideo" ? 'video' : 'image';
+
+        console.log(`Attempting to delete a ${resource_type} file`);
         const response = await cloudinary.uploader.destroy(
             `${file_public_id}`,
             {
-                resource_type: 'image'
+                resource_type: resource_type
             }
         )
         console.log(response);
