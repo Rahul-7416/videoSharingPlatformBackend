@@ -1,6 +1,5 @@
 import mongoose, {isValidObjectId} from "mongoose"
 import {Video} from "../models/video.model.js"
-import {User} from "../models/user.model.js"
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
@@ -35,10 +34,14 @@ const getAllVideos = asyncHandler(async (req, res) => {
     }
 
     // match stage for filtering based on the userId parameter
+    if (!isValidObjectId(userId)) {
+        throw new ApiError(400, "Not a valid Objectid");
+    }
+
     if (userId) {
         pipeline.push({
             $match: {
-                owner: new mongoose.Types.ObjectId(userId)
+                owner: mongoose.Types.ObjectId.createFromHexString(userId)
             }
         });
     }
