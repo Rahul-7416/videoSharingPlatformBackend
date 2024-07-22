@@ -29,6 +29,13 @@ const uploadOnCloudinary = async (localFilePath) => {
 
         console.log(response);
 
+        // The case where we don't want to delete our img file -> as it needs to be there everytime for the testing purpose
+        const typeOfDir = localFilePath.split('/');
+        console.log(typeOfDir);
+        if (typeOfDir[2] === "test") {
+            return response;
+        }
+
         // Optionally remove the local file after uploading
         if (fs.existsSync(localFilePath)) {
             fs.unlinkSync(localFilePath);
@@ -69,4 +76,27 @@ const deleteFromCloudinary = async (file_public_id) => {  // file_public_id -> c
     }
 }
 
-export { uploadOnCloudinary, deleteFromCloudinary };
+const healthCheckCloudinary = async () => {
+    try {
+        // NOTE: Always give path from the point of view that you are in the root directory and do not use the relative path from the directory, same for the multer middleware
+        // e.g.: './public/test/testImageForCloudinary.png' -> correct path, as it is from the pov of root directory
+        // but: '../../public/test/testImageForCloudinary.png' -> incorrect path, as it is relative to the current file
+
+        // const testFilePath = await path.resolve(__dirname, './public/test');
+        const testFilePath = './public/test/testImageForCloudinary.png';
+        console.log(testFilePath);
+        if (!fs.existsSync(testFilePath)) {
+            throw new Error(`Test file does not exist: ${testFilePath}`);
+        }
+
+        const uploadResponse = await uploadOnCloudinary(testFilePath);
+        console.log(uploadResponse);
+        await deleteFromCloudinary(uploadResponse.public_id);
+        return true;
+    } catch (error) {
+        console.error('Cloudinary health check failed:', error);
+        return false;
+    }
+}
+
+export { uploadOnCloudinary, deleteFromCloudinary, healthCheckCloudinary };
